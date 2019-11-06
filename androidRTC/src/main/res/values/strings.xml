@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AndroidRTC</string>
+    <string name="host">39.106.185.26</string>
+    <!-- string name="host">10.26.167.55</string-->
+    <string name="port">80</string>
+    <string name="action_settings">Options</string>
+</resources>
