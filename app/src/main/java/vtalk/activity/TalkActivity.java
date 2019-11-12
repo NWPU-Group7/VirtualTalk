@@ -23,6 +23,7 @@ import java.util.StringTokenizer;
 
 import fr.pchab.webrtcclient.PeerConnectionParameters;
 import fr.pchab.webrtcclient.WebRtcClient;
+import signalprocess.audio.AudioPlayThread;
 import signalprocess.audio.AudioRecordThread;
 import signalprocess.face.CameraPreview;
 import signalprocess.face.Live2dGLSurfaceView;
@@ -47,6 +48,7 @@ public class TalkActivity extends AppCompatActivity implements WebRtcClient.RtcL
     public String mSocketAddress;
     public WebRtcClient client;
     private WebRtcClient.MessageListener messageListener;
+    private WebRtcClient.AudioListener audioListener;
 
     public Queue<double[]> emtionQueue;
     public Queue<byte[]> audioQueue;
@@ -61,6 +63,7 @@ public class TalkActivity extends AppCompatActivity implements WebRtcClient.RtcL
 
     /** 语音部分 **/
     public AudioRecordThread audioRecordThread;
+    public AudioPlayThread audioPlayThread;
 
     protected void changeVisiable() {
         mGLSurfaceView.setVisibility(View.GONE);
@@ -99,6 +102,7 @@ public class TalkActivity extends AppCompatActivity implements WebRtcClient.RtcL
         mGLSurfaceView.init(TalkActivity.this, Live2DReference.MODEL_SET.get(0), Live2DReference.TEXTURE_SET.get(0), 1, 1);
 
         networkSetup();
+        audioUnitSetup();
 
         MainActivity.sholdShowLoadingView = false;
     }
@@ -147,19 +151,29 @@ public class TalkActivity extends AppCompatActivity implements WebRtcClient.RtcL
             }
         };
 
-        client = new WebRtcClient(this, mSocketAddress, params, VideoRendererGui.getEGLContext(), messageListener);
+        audioListener = new WebRtcClient.AudioListener() {
+            @Override
+            public void onAudio(byte[] bytes) {
+                audioQueue.add(bytes);
+            }
+        };
+
+        client = new WebRtcClient(this, mSocketAddress, params, VideoRendererGui.getEGLContext(),
+                messageListener, audioListener);
 
         //client.start("virtual_talk");
 
         Log.d(TAG, "network init");
     }
 
-    private void audioUnitSetup()
-    {
+    private void audioUnitSetup() {
         audioRecordThread = new AudioRecordThread();
         audioRecordThread.init(this);
+        audioRecordThread.start();
 
-        //audioRecordThread.start();
+        audioPlayThread = new AudioPlayThread();
+        audioPlayThread.init(this);
+        audioPlayThread.start();
     }
 
     public double[] getEmotion(){
@@ -184,7 +198,7 @@ public class TalkActivity extends AppCompatActivity implements WebRtcClient.RtcL
     }
 
     public void postAudio(byte[] audioByte){
-
+        client.sendAudioViaDataChannelToAllPeers(audioByte);
     }
 
     public byte[] getAudio() {

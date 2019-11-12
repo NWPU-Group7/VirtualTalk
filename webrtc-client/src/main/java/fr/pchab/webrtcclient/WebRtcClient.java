@@ -2,7 +2,6 @@ package fr.pchab.webrtcclient;
 
 import android.opengl.EGLContext;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.IO;
@@ -43,6 +42,7 @@ public class WebRtcClient {
     private Socket client;
 
     private MessageListener messageListener;
+    private AudioListener audioListener;
 
     /**
      * Implement this interface to be notified of events.
@@ -127,6 +127,13 @@ public class WebRtcClient {
         client.emit("message", message);
     }
 
+    public void sendAudioViaDataChannelToAllPeers(byte[] bytes){
+        Log.d(TAG, "peerSize " + peers.size());
+        for (Peer peer: peers.values()){
+            peer.sendAudioViaDataChannel(bytes);
+        }
+    }
+
     public void sendMessageViaDataChannelToAllPeers(String message){
         Log.d(TAG, "peerSize " + peers.size());
         for (Peer peer: peers.values()){
@@ -184,16 +191,21 @@ public class WebRtcClient {
         };
     }
 
-    public interface MessageListener{
+    public interface MessageListener {
         void onMessage(String message);
+    }
+
+    public interface AudioListener {
+        void onAudio(byte[] bytes);
     }
 
     private class Peer implements SdpObserver, PeerConnection.Observer, DataChannel.Observer {
         private PeerConnection pc;
-        private DataChannel dataChannel;
+        private DataChannel dataChannelMessage, dataChannelAudio;
         private String id;
         private int endPoint;
-        private MessageListener listener;
+        private MessageListener messageListener;
+        private AudioListener audioListener;
 
         public Peer(String id, int endPoint) {
             Log.d(TAG, "new Peer: " + id + " " + endPoint);
@@ -202,30 +214,61 @@ public class WebRtcClient {
             this.endPoint = endPoint;
 
             // =============== DataChannel ===============
-            DataChannel.Init init = new DataChannel.Init();
-            init.ordered = true;
-            dataChannel = pc.createDataChannel("dataChannel", init);
-            dataChannel.registerObserver(this);
+            DataChannel.Init initMessage = new DataChannel.Init();
+            initMessage.ordered = true;
+            dataChannelMessage = pc.createDataChannel("dataChannelMessage", initMessage);
+            dataChannelMessage.registerObserver(this);
+
+            DataChannel.Init initAudio = new DataChannel.Init();
+            initAudio.ordered = true;
+            dataChannelAudio = pc.createDataChannel("dataChannelAudio", initAudio);
+            dataChannelAudio.registerObserver(new DataChannel.Observer() {
+                @Override
+                public void onStateChange() {
+                    Log.d(TAG, "DataChannel(Audio) onStateChange: " + dataChannelMessage.state());
+                }
+
+                @Override
+                public void onMessage(DataChannel.Buffer buffer) {
+                    ByteBuffer data = buffer.data;
+                    byte[] bytes = new byte[data.capacity()];
+                    data.get(bytes);
+
+                    Log.d(TAG, "### DataChannel onAudio");
+                    if (null != audioListener)
+                        audioListener.onAudio(bytes);
+                }
+            });
 
             //pc.addStream(localMS); //, new MediaConstraints()
             mListener.onStatusChanged("CONNECTING");
         }
 
         // =============== DataChannel ===============
-        public void setListener(MessageListener listener){
-            this.listener = listener;
+        public void setMessageListener(MessageListener messageListener) {
+            this.messageListener = messageListener;
+        }
+
+        public void setAudioListener(AudioListener audioListener) {
+            this.audioListener = audioListener;
+        }
+
+        public void sendAudioViaDataChannel(byte[] bytes){
+            Log.d(TAG, "### DataChannel sendAudio");
+            DataChannel.Buffer buffer = new DataChannel.Buffer(ByteBuffer.wrap(bytes), false);
+            dataChannelMessage.send(buffer);
         }
 
         public void sendMessageViaDataChannel(String message){
             Log.d(TAG, "### DataChannel sendMessage: " + message);
             byte[] messageBytes = message.getBytes();
             DataChannel.Buffer buffer = new DataChannel.Buffer(ByteBuffer.wrap(messageBytes), false);
-            dataChannel.send(buffer);
+            dataChannelMessage.send(buffer);
         }
 
         @Override
         public void onStateChange() {
-            Log.d(TAG, "DataChannel onStateChange: " + dataChannel.state());
+            Log.d(TAG, "DataChannel onStateChange: " + dataChannelMessage.state());
         }
 
         @Override
@@ -236,8 +279,8 @@ public class WebRtcClient {
 
             String message = new String(bytes);
             Log.d(TAG, "### DataChannel onMessage: " + message);
-            if (this.listener != null)
-                listener.onMessage(message);
+            if (this.messageListener != null)
+                messageListener.onMessage(message);
         }
 
         // =============== SdpObserver ===============
@@ -325,7 +368,8 @@ public class WebRtcClient {
 
     private Peer addPeer(String id, int endPoint) {
         Peer peer = new Peer(id, endPoint);
-        peer.setListener(messageListener);
+        peer.setMessageListener(messageListener);
+        peer.setAudioListener(audioListener);
         peers.put(id, peer);
 
         endPoints[endPoint] = true;
@@ -340,8 +384,11 @@ public class WebRtcClient {
         endPoints[peer.endPoint] = false;
     }
 
-    public WebRtcClient(RtcListener listener, String host, PeerConnectionParameters params, EGLContext mEGLcontext, MessageListener MessageListener) {
+    public WebRtcClient(RtcListener listener, String host, PeerConnectionParameters params,
+                        EGLContext mEGLcontext, MessageListener messageListener, AudioListener audioListener) {
         this.messageListener = messageListener;
+        this.audioListener = audioListener;
+
         this.mListener = listener;
         this.pcParams = params;
         PeerConnectionFactory.initializeAndroidGlobals(listener, true, true,

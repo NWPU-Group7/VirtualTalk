@@ -5,6 +5,8 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.util.Log;
 
+import com.smp.soundtouchandroid.SoundTouch;
+
 import java.io.DataOutputStream;
 import java.util.LinkedList;
 

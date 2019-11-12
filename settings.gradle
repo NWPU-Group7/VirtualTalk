@@ -1,1 +1,1 @@
-include ':app', ':kawaii_loadingview', ':androidRTC', ':webrtc-client'
+include ':app', ':kawaii_loadingview', ':androidRTC', ':webrtc-client', ':soundtouch_library'
