@@ -154,7 +154,9 @@ public class TalkActivity extends AppCompatActivity implements WebRtcClient.RtcL
         audioListener = new WebRtcClient.AudioListener() {
             @Override
             public void onAudio(byte[] bytes) {
-                audioQueue.add(bytes);
+                synchronized (audioQueue) {
+                    audioQueue.add(bytes);
+                }
             }
         };
 

@@ -225,7 +225,7 @@ public class WebRtcClient {
             dataChannelAudio.registerObserver(new DataChannel.Observer() {
                 @Override
                 public void onStateChange() {
-                    Log.d(TAG, "DataChannel(Audio) onStateChange: " + dataChannelMessage.state());
+                    Log.d(TAG, "DataChannel(Audio) onStateChange: " + dataChannelAudio.state());
                 }
 
                 @Override
@@ -255,8 +255,8 @@ public class WebRtcClient {
 
         public void sendAudioViaDataChannel(byte[] bytes){
             Log.d(TAG, "### DataChannel sendAudio");
-            DataChannel.Buffer buffer = new DataChannel.Buffer(ByteBuffer.wrap(bytes), false);
-            dataChannelMessage.send(buffer);
+            DataChannel.Buffer buffer = new DataChannel.Buffer(ByteBuffer.wrap(bytes), true);
+            dataChannelAudio.send(buffer);
         }
 
         public void sendMessageViaDataChannel(String message){
@@ -279,8 +279,10 @@ public class WebRtcClient {
 
             String message = new String(bytes);
             Log.d(TAG, "### DataChannel onMessage: " + message);
-            if (this.messageListener != null)
+            if (!buffer.binary && this.messageListener != null)
                 messageListener.onMessage(message);
+            if (buffer.binary && this.audioListener != null)
+                audioListener.onAudio(bytes);
         }
 
         // =============== SdpObserver ===============
