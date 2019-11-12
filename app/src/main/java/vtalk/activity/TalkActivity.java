@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.opengl.GLSurfaceView;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -12,28 +11,25 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
-import android.widget.Toast;
 
 
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.webrtc.MediaStream;
 import org.webrtc.VideoRendererGui;
 
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.StringTokenizer;
 
 import fr.pchab.webrtcclient.PeerConnectionParameters;
 import fr.pchab.webrtcclient.WebRtcClient;
-import signalprocess.facecapture.CameraPreview;
-import signalprocess.facecapture.Live2dGLSurfaceView;
+import signalprocess.audio.AudioRecordThread;
+import signalprocess.face.CameraPreview;
+import signalprocess.face.Live2dGLSurfaceView;
 import network.Live2DReference;
 import network.NetworkActivity;
 
-public class CameraActivity extends AppCompatActivity implements WebRtcClient.RtcListener, NetworkActivity {
+public class TalkActivity extends AppCompatActivity implements WebRtcClient.RtcListener, NetworkActivity {
 
     /** 属性 **/
     private static final String VIDEO_CODEC_VP9 = "VP9";
@@ -44,7 +40,7 @@ public class CameraActivity extends AppCompatActivity implements WebRtcClient.Rt
 
     private int CAMERA_REQUEST_CODE = 20;
 
-    private String TAG = "CameraActivity";
+    private String TAG = "TalkActivity";
 
     /**  通讯部分 **/
     private String callerId;
@@ -52,7 +48,8 @@ public class CameraActivity extends AppCompatActivity implements WebRtcClient.Rt
     public WebRtcClient client;
     private WebRtcClient.MessageListener messageListener;
 
-    public Queue<double[]> queue;
+    public Queue<double[]> emtionQueue;
+    public Queue<byte[]> audioQueue;
 
     /** 显示部分 **/
     private CameraPreview mCameraPreview; //相机view
@@ -61,6 +58,9 @@ public class CameraActivity extends AppCompatActivity implements WebRtcClient.Rt
     public final double[] emotion = new double[10]; // 人物表情控制参数
     private int emotionSize = 4; // 总共的表情数 用于通讯控制
     private int mModel = 0; // 使用的模型号
+
+    /** 语音部分 **/
+    public AudioRecordThread audioRecordThread;
 
     protected void changeVisiable() {
         mGLSurfaceView.setVisibility(View.GONE);
@@ -85,7 +85,8 @@ public class CameraActivity extends AppCompatActivity implements WebRtcClient.Rt
             }
         }
 
-        queue = new LinkedList<>();
+        emtionQueue = new LinkedList<>();
+        audioQueue = new LinkedList<>();
 
         callerId = null;
         Intent intent = getIntent();
@@ -95,7 +96,7 @@ public class CameraActivity extends AppCompatActivity implements WebRtcClient.Rt
         mCameraPreview.init(this);
 
         mGLSurfaceView = (Live2dGLSurfaceView) findViewById(R.id.live2dView);
-        mGLSurfaceView.init(CameraActivity.this, Live2DReference.MODEL_SET.get(0), Live2DReference.TEXTURE_SET.get(0), 1, 1);
+        mGLSurfaceView.init(TalkActivity.this, Live2DReference.MODEL_SET.get(0), Live2DReference.TEXTURE_SET.get(0), 1, 1);
 
         networkSetup();
 
@@ -121,10 +122,7 @@ public class CameraActivity extends AppCompatActivity implements WebRtcClient.Rt
             @Override
             public void onMessage(String message) {
 
-                Log.d(TAG, message);
-
                 StringTokenizer tokenizer = new StringTokenizer(message, " ");
-
                 if (tokenizer.countTokens() != emotionSize)
                     Log.d(TAG, "received message error");
                 else
@@ -133,14 +131,14 @@ public class CameraActivity extends AppCompatActivity implements WebRtcClient.Rt
                     for (int i = 0; i < emotionSize; i++)
                         tmp[i] = Double.valueOf(tokenizer.nextToken());
 
-                    synchronized(queue) {
+                    synchronized(emtionQueue) {
 
                         for (int i = 1; i <= FILL_FRAME_FACTOR; i++)
                         {
                             double[] tt = new double[10];
                             for (int j = 0; j < emotionSize; j++)
                                 tt[j] = (emotion[j]*(FILL_FRAME_FACTOR-i)+tmp[j]*i)/FILL_FRAME_FACTOR;
-                            queue.add(tt);
+                            emtionQueue.add(tt);
                         }
                         for (int i = 0; i < emotionSize; i++)
                             emotion[i] = tmp[i];
@@ -156,16 +154,24 @@ public class CameraActivity extends AppCompatActivity implements WebRtcClient.Rt
         Log.d(TAG, "network init");
     }
 
+    private void audioUnitSetup()
+    {
+        audioRecordThread = new AudioRecordThread();
+        audioRecordThread.init(this);
+
+        //audioRecordThread.start();
+    }
+
     public double[] getEmotion(){
-        synchronized (queue){
-            if  (queue.isEmpty())
+        synchronized (emtionQueue){
+            if  (emtionQueue.isEmpty())
                 return this.emotion;
             else
-                return queue.poll();
+                return emtionQueue.poll();
         }
     }
 
-    public void postEmotion(double emotion[]) {
+    public void postEmotion(double[] emotion) {
 
         String message = "";
         for (int i = 0; i < emotionSize; i++) {
@@ -175,6 +181,19 @@ public class CameraActivity extends AppCompatActivity implements WebRtcClient.Rt
         }
 
         client.sendMessageViaDataChannelToAllPeers(message);
+    }
+
+    public void postAudio(byte[] audioByte){
+
+    }
+
+    public byte[] getAudio() {
+        synchronized (audioQueue){
+            if  (audioQueue.isEmpty())
+                return null;
+            else
+                return audioQueue.poll();
+        }
     }
 
     public void call(String callId) {
@@ -216,6 +235,7 @@ public class CameraActivity extends AppCompatActivity implements WebRtcClient.Rt
     public void onDestroy() {
         super.onDestroy();
         callerId = null;
+        audioRecordThread.free();
     }
 
     @Override

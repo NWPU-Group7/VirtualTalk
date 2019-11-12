@@ -17,7 +17,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
 /**
- * Created by Carson_Ho on 17/7/29.
+ * 一个简单的小动画
  */
 
 public class Utils extends View {

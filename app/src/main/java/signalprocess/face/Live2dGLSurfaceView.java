@@ -1,4 +1,4 @@
-package signalprocess.facecapture;
+package signalprocess.face;
 
 /**
  * Created by Administrator on 2017/5/11.
@@ -11,8 +11,7 @@ import jp.live2d.android.Live2DModelAndroid;
 import jp.live2d.android.UtOpenGL;
 import jp.live2d.framework.L2DEyeBlink;
 import jp.live2d.framework.L2DStandardID;
-import network.NetworkActivity;
-import vtalk.activity.CameraActivity;
+import vtalk.activity.TalkActivity;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
@@ -40,7 +39,7 @@ public class Live2dGLSurfaceView extends GLSurfaceView {
         this.mContext = context;
     }
 
-    public void init(CameraActivity activity, String MODEL_PATH, String[] TEXTURE_PATHS,
+    public void init(TalkActivity activity, String MODEL_PATH, String[] TEXTURE_PATHS,
                      float wRatio, float hRatio) {
 
         this.mLive2dRenderer = new Live2dRenderer();
@@ -50,7 +49,7 @@ public class Live2dGLSurfaceView extends GLSurfaceView {
 }
 
 class Live2dRenderer implements GLSurfaceView.Renderer {
-    private CameraActivity mActivity;
+    private TalkActivity mActivity;
     private Live2DModelAndroid	live2DModel;
     private L2DEyeBlink mEyeBlink;
 
@@ -59,7 +58,7 @@ class Live2dRenderer implements GLSurfaceView.Renderer {
 
     private float wRatio, hRatio;
 
-    public void setUpModel(CameraActivity activity, String MODEL_PATH, String[] TEXTURE_PATHS,
+    public void setUpModel(TalkActivity activity, String MODEL_PATH, String[] TEXTURE_PATHS,
                            float wRatio, float hRatio) {
         this.mActivity = activity;
         this.MODEL_PATH = MODEL_PATH;

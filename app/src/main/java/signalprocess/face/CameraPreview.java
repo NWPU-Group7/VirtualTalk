@@ -1,4 +1,4 @@
-package signalprocess.facecapture;
+package signalprocess.face;
 
 /**
  * Created by Administrator on 2017/5/11.
@@ -23,8 +23,7 @@ import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
 
-import network.NetworkActivity;
-import vtalk.activity.CameraActivity;
+import vtalk.activity.TalkActivity;
 
 
 public class CameraPreview extends SurfaceView
@@ -32,7 +31,7 @@ public class CameraPreview extends SurfaceView
 
     public int frameRate = 2;
     private Context mContext;
-    private CameraActivity mActivity;
+    private TalkActivity mActivity;
 
     private int CAMERA_REQUEST_CODE = 20;
     private Camera mCamera = null;
@@ -59,7 +58,7 @@ public class CameraPreview extends SurfaceView
         this.mContext = context;
     }
 
-    public void init(CameraActivity activity) {
+    public void init(TalkActivity activity) {
 
         this.mActivity = activity;
 

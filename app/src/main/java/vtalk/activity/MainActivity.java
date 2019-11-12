@@ -8,17 +8,14 @@ import android.os.Message;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
 
 
-import fr.pchab.androidrtc.RtcActivity;
 import scut.carson_ho.kawaii_loadingview.Kawaii_LoadingView;
 
 @EActivity(R.layout.activity_main)
@@ -79,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
 
         //Toast.makeText(this, "初始化将会占用几秒，请耐心等待", Toast.LENGTH_LONG);
 
-        Intent intent = new Intent(this, CameraActivity.class);
+        Intent intent = new Intent(this, TalkActivity.class);
         intent.putExtra("callerId", callerId);
         startActivity(intent);
     }

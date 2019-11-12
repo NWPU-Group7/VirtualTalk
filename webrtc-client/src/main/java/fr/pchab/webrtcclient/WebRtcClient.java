@@ -340,7 +340,7 @@ public class WebRtcClient {
         endPoints[peer.endPoint] = false;
     }
 
-    public WebRtcClient(RtcListener listener, String host, PeerConnectionParameters params, EGLContext mEGLcontext, MessageListener messageListener) {
+    public WebRtcClient(RtcListener listener, String host, PeerConnectionParameters params, EGLContext mEGLcontext, MessageListener emtionMessageListener, MessageListener audioMessageListener) {
         this.messageListener = messageListener;
         this.mListener = listener;
         this.pcParams = params;
