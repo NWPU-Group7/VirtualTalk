@@ -11,6 +11,7 @@ import android.graphics.Canvas;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.graphics.YuvImage;
@@ -22,7 +23,7 @@ import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
 
-import network.Packet;
+import network.NetworkActivity;
 import vtalk.activity.CameraActivity;
 
 
@@ -30,8 +31,6 @@ public class CameraPreview extends SurfaceView
                            implements SurfaceHolder.Callback {
 
     public int frameRate = 2;
-
-    public Packet packet;
     private Context mContext;
     private CameraActivity mActivity;
 
@@ -60,18 +59,16 @@ public class CameraPreview extends SurfaceView
         this.mContext = context;
     }
 
-    public void init(CameraActivity activity, Packet packet) {
+    public void init(CameraActivity activity) {
 
         this.mActivity = activity;
-        this.packet = packet;
 
         mSurfaceHolder = this.getHolder();
         mSurfaceHolder.setKeepScreenOn(true);
         mSurfaceHolder.addCallback(this);
 
         mSurfaceTexture = new SurfaceTexture(10);
-
-        mFaceDetector = new FaceDetector(this.mContext, this.mActivity, this.packet);
+        mFaceDetector = new FaceDetector(this.mContext, this.mActivity);
     }
 
     @Override
@@ -141,8 +138,16 @@ public class CameraPreview extends SurfaceView
                 Matrix matrix = new Matrix();
                 matrix.postScale(-1, 1);
                 matrix.postTranslate(src.getWidth(), 0);
-                final Bitmap dst = Bitmap.createBitmap(src.getWidth(), src.getHeight(), src.getConfig());
-                new Canvas(dst).drawBitmap(src, matrix, new Paint());
+
+                Paint paint = new Paint();
+                PaintFlagsDrawFilter pfd= new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG|Paint.FILTER_BITMAP_FLAG);
+                paint.setFilterBitmap(true); //对Bitmap进行滤波处理
+                paint.setAntiAlias(true);//设置抗锯齿
+                Rect rect = new Rect(0, 0, src.getWidth(), src.getHeight());
+                final Bitmap dst = Bitmap.createBitmap(rect.width(), rect.height(), src.getConfig());
+                Canvas canvas = new Canvas(dst);
+                canvas.setDrawFilter(pfd);
+                canvas.drawBitmap(src, matrix, paint);
 
                 synchronized (mSurfaceHolder) {
 
@@ -152,9 +157,9 @@ public class CameraPreview extends SurfaceView
                         factor = 0;
                     }
 
-                    Canvas canvas = mSurfaceHolder.lockCanvas();
-                    canvas.drawBitmap(dst, 0, 0, null);
-                    mSurfaceHolder.unlockCanvasAndPost(canvas);
+                    Canvas canvas1 = mSurfaceHolder.lockCanvas();
+                    canvas1.drawBitmap(dst, 0, 0, null);
+                    mSurfaceHolder.unlockCanvasAndPost(canvas1);
                 }
             }
         }

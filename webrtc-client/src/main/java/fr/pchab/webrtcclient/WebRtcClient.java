@@ -128,6 +128,7 @@ public class WebRtcClient {
     }
 
     public void sendMessageViaDataChannelToAllPeers(String message){
+        Log.d(TAG, "peerSize " + peers.size());
         for (Peer peer: peers.values()){
             peer.sendMessageViaDataChannel(message);
         }
@@ -151,6 +152,7 @@ public class WebRtcClient {
                 try {
                     String from = data.getString("from");
                     String type = data.getString("type");
+                    Log.d(TAG, "+type+" + type);
                     JSONObject payload = null;
                     if (!type.equals("init")) {
                         payload = data.getJSONObject("payload");
@@ -161,7 +163,7 @@ public class WebRtcClient {
                         int endPoint = findEndPoint();
                         if (endPoint != MAX_PEER) {
                             Peer peer = addPeer(from, endPoint);
-                            peer.pc.addStream(localMS);
+                            // peer.pc.addStream(localMS);
                             commandMap.get(type).execute(from, payload);
                         }
                     } else {
@@ -205,7 +207,7 @@ public class WebRtcClient {
             dataChannel = pc.createDataChannel("dataChannel", init);
             dataChannel.registerObserver(this);
 
-            pc.addStream(localMS); //, new MediaConstraints()
+            //pc.addStream(localMS); //, new MediaConstraints()
             mListener.onStatusChanged("CONNECTING");
         }
 
@@ -339,16 +341,16 @@ public class WebRtcClient {
     }
 
     public WebRtcClient(RtcListener listener, String host, PeerConnectionParameters params, EGLContext mEGLcontext, MessageListener messageListener) {
-        messageListener = messageListener;
-        mListener = listener;
-        pcParams = params;
+        this.messageListener = messageListener;
+        this.mListener = listener;
+        this.pcParams = params;
         PeerConnectionFactory.initializeAndroidGlobals(listener, true, true,
                 params.videoCodecHwAcceleration, mEGLcontext);
-        factory = new PeerConnectionFactory();
+        this.factory = new PeerConnectionFactory();
         MessageHandler messageHandler = new MessageHandler();
 
         try {
-            client = IO.socket(host);
+            this.client = IO.socket(host);
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
@@ -356,13 +358,14 @@ public class WebRtcClient {
         for (int i = 0; i<10; i++)
             System.out.println("A");
 
-        client.on("id", messageHandler.onId);
-        client.on("message", messageHandler.onMessage);
-        client.connect();
+        this.client.on("id", messageHandler.onId);
+        this.client.on("message", messageHandler.onMessage);
+        this.client.connect();
 
         // iceServers.add(new PeerConnection.IceServer("stun:23.21.150.121"));
         // iceServers.add(new PeerConnection.IceServer("stun:39.106.185.26", "virtual", "talk"));
         iceServers.add(new PeerConnection.IceServer("stun:stun.internetcalls.com"));
+        iceServers.add(new PeerConnection.IceServer("turn:47.92.141.59:3478","jialu","ghl0219"));
         // iceServers.add(new PeerConnection.IceServer("stun:stun.l.google.com:19302"));
 
         pcConstraints.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveAudio", "true"));
@@ -413,7 +416,7 @@ public class WebRtcClient {
      * @param name client name
      */
     public void start(String name) {
-        setCamera();
+        //setCamera();
         try {
             JSONObject message = new JSONObject();
             message.put("name", name);
@@ -433,13 +436,13 @@ public class WebRtcClient {
             videoConstraints.mandatory.add(new MediaConstraints.KeyValuePair("minFrameRate", Integer.toString(pcParams.videoFps)));
 
             videoSource = factory.createVideoSource(getVideoCapturer(), videoConstraints);
-            localMS.addTrack(factory.createVideoTrack("ARDAMSv0", videoSource));
+            //localMS.addTrack(factory.createVideoTrack("ARDAMSv0", videoSource));
         }
 
         AudioSource audioSource = factory.createAudioSource(new MediaConstraints());
-        localMS.addTrack(factory.createAudioTrack("ARDAMSa0", audioSource));
+        //localMS.addTrack(factory.createAudioTrack("ARDAMSa0", audioSource));
 
-        mListener.onLocalStream(localMS);
+        //mListener.onLocalStream(localMS);
     }
 
     private VideoCapturer getVideoCapturer() {

@@ -13,7 +13,7 @@ android {
     buildToolsVersion '28.0.3'
     defaultConfig {
         applicationId "vtalk.activity"
-        minSdkVersion 21
+        minSdkVersion 19
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
@@ -33,6 +33,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.key0
         }
         debug {
             signingConfig signingConfigs.key0
@@ -73,7 +74,6 @@ dependencies {
     apt "org.androidannotations:androidannotations:4.0.0"
     compile 'org.androidannotations:androidannotations-api:4.0.0'
     testCompile 'junit:junit:4.12'
-
     compile project(':kawaii_loadingview')
     compile project(':androidRTC')
 }

@@ -11,7 +11,7 @@ import jp.live2d.android.Live2DModelAndroid;
 import jp.live2d.android.UtOpenGL;
 import jp.live2d.framework.L2DEyeBlink;
 import jp.live2d.framework.L2DStandardID;
-import network.Packet;
+import network.NetworkActivity;
 import vtalk.activity.CameraActivity;
 
 import android.content.Context;
@@ -40,19 +40,17 @@ public class Live2dGLSurfaceView extends GLSurfaceView {
         this.mContext = context;
     }
 
-    public void init(CameraActivity activity, Packet packet, String MODEL_PATH, String[] TEXTURE_PATHS,
+    public void init(CameraActivity activity, String MODEL_PATH, String[] TEXTURE_PATHS,
                      float wRatio, float hRatio) {
 
         this.mLive2dRenderer = new Live2dRenderer();
-        this.mLive2dRenderer.setUpModel(activity, packet, MODEL_PATH, TEXTURE_PATHS, wRatio, hRatio);
+        this.mLive2dRenderer.setUpModel(activity, MODEL_PATH, TEXTURE_PATHS, wRatio, hRatio);
         this.setRenderer(this.mLive2dRenderer);
     }
 }
 
 class Live2dRenderer implements GLSurfaceView.Renderer {
     private CameraActivity mActivity;
-    private Packet packet;
-
     private Live2DModelAndroid	live2DModel;
     private L2DEyeBlink mEyeBlink;
 
@@ -61,10 +59,9 @@ class Live2dRenderer implements GLSurfaceView.Renderer {
 
     private float wRatio, hRatio;
 
-    public void setUpModel(CameraActivity activity, Packet packet, String MODEL_PATH, String[] TEXTURE_PATHS,
+    public void setUpModel(CameraActivity activity, String MODEL_PATH, String[] TEXTURE_PATHS,
                            float wRatio, float hRatio) {
         this.mActivity = activity;
-        this.packet = packet;
         this.MODEL_PATH = MODEL_PATH;
         this.TEXTURE_PATHS = TEXTURE_PATHS;
         this.wRatio = wRatio;
@@ -98,7 +95,7 @@ class Live2dRenderer implements GLSurfaceView.Renderer {
 
         mEyeBlink.updateParam(live2DModel);
 
-        double[] emotion = packet.getEmotion();
+        double[] emotion = mActivity.getEmotion();
 
         live2DModel.setParamFloat(L2DStandardID.PARAM_ANGLE_Z, (float) emotion[0], 0.75f);
         live2DModel.setParamFloat(L2DStandardID.PARAM_ANGLE_X , (float) emotion[1], 0.75f);
