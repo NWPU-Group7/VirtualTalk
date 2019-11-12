@@ -18,10 +18,13 @@ import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
 
 
+import fr.pchab.androidrtc.RtcActivity;
 import scut.carson_ho.kawaii_loadingview.Kawaii_LoadingView;
 
 @EActivity(R.layout.activity_main)
 public class MainActivity extends AppCompatActivity {
+
+    public String callerId = null;
 
     public static Boolean sholdShowLoadingView = false;
 
@@ -38,7 +41,8 @@ public class MainActivity extends AppCompatActivity {
     private static String[] PERMISSIONS_REQ = {
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.CAMERA
+            Manifest.permission.CAMERA,
+            Manifest.permission.RECORD_AUDIO
     };
     private static final int REQUEST_CODE_PERMISSION = 2;
 
@@ -75,7 +79,9 @@ public class MainActivity extends AppCompatActivity {
 
         //Toast.makeText(this, "初始化将会占用几秒，请耐心等待", Toast.LENGTH_LONG);
 
-        startActivity(new Intent(this, CameraActivity.class));
+        Intent intent = new Intent(this, CameraActivity.class);
+        intent.putExtra("callerId", callerId);
+        startActivity(intent);
     }
 
     @Override
@@ -94,6 +100,13 @@ public class MainActivity extends AppCompatActivity {
                     PERMISSIONS_REQ,
                     REQUEST_CODE_PERMISSION
             );
+        }
+
+        final Intent intent = getIntent();
+        final String action = intent.getAction();
+        if (Intent.ACTION_VIEW.equals(action)) {
+            final String urlId =intent.getData().getQueryParameter("id");
+            callerId = urlId;
         }
     }
 

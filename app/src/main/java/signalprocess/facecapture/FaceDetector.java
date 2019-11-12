@@ -15,15 +15,13 @@ import com.tzutalin.dlib.VisionDetRet;
 import java.util.ArrayList;
 import java.util.List;
 
-import network.Packet;
+import network.NetworkActivity;
 import vtalk.activity.CameraActivity;
 
 public class FaceDetector {
     private String TAG = "FaceDetector";
 
     private int mCounter = 0;
-
-    public Packet packet;
 
     private double[] emotion = new double[10];
     private Context mContext;
@@ -33,13 +31,11 @@ public class FaceDetector {
 
     private final double r_m = 0.4, r_n = 0.5;
 
-    public FaceDetector(Context c, CameraActivity activity, Packet packet) {
+    public FaceDetector(Context c, CameraActivity activity) {
 
         this.mContext = c;
         this.mActivity = activity;
         this.mFaceDet = new FaceDet(Constants.getFaceShapeModelPath());
-        this.packet = packet;
-
         mLandmarkPaint = new Paint();
         mLandmarkPaint.setColor(Color.GREEN);
         mLandmarkPaint.setStrokeWidth(2);
@@ -76,7 +72,7 @@ public class FaceDetector {
             solveFacePose(landmarks);
             solveEmotion(landmarks, width);
 
-            packet.postEmotion(emotion);
+            mActivity.postEmotion(emotion);
         }
     }
 
