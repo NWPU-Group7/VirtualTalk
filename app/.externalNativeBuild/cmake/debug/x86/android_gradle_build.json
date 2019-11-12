@@ -1,0 +1,36 @@
+{
+  "buildFiles": [
+    "/home/tanglizi/Code/android/vtalk/app/../../../../Android/Sdk/ndk/20.0.5594570/build/cmake/android.toolchain.cmake",
+    "/home/tanglizi/Code/android/vtalk/app/CMakeLists.txt",
+    "/home/tanglizi/Code/android/vtalk/app/../../../../Android/Sdk/ndk/20.0.5594570/build/cmake/platforms.cmake"
+  ],
+  "cleanCommands": [
+    "/home/tanglizi/Android/Sdk/cmake/3.10.2.4988404/bin/cmake --build /home/tanglizi/Code/android/vtalk/app/.externalNativeBuild/cmake/debug/x86 --target clean"
+  ],
+  "libraries": {
+    "native-lib-Debug-x86": {
+      "buildCommand": "/home/tanglizi/Android/Sdk/cmake/3.10.2.4988404/bin/cmake --build /home/tanglizi/Code/android/vtalk/app/.externalNativeBuild/cmake/debug/x86 --target native-lib",
+      "buildType": "debug",
+      "toolchain": "1533987620",
+      "abi": "x86",
+      "artifactName": "native-lib",
+      "files": [
+        {
+          "src": "/home/tanglizi/Code/android/vtalk/app/src/main/cpp/native-lib.cpp",
+          "flags": "-g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -mstackrealign -fno-addrsig -Wa,--noexecstack -Wformat -Werror=format-security   -O0 -fno-limit-debug-info  -fPIC  ",
+          "workingDirectory": "/home/tanglizi/Code/android/vtalk/app/.externalNativeBuild/cmake/debug/x86"
+        }
+      ],
+      "output": "/home/tanglizi/Code/android/vtalk/app/build/intermediates/cmake/debug/obj/x86/libnative-lib.so"
+    }
+  },
+  "toolchains": {
+    "1533987620": {
+      "cppCompilerExecutable": "/home/tanglizi/Android/Sdk/ndk/20.0.5594570/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++"
+    }
+  },
+  "cFileExtensions": [],
+  "cppFileExtensions": [
+    "cpp"
+  ]
+}

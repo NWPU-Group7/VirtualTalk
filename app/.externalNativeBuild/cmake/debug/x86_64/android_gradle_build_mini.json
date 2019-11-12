@@ -1,0 +1,18 @@
+{
+  "buildFiles": [
+    "/home/tanglizi/Code/android/vtalk/app/../../../../Android/Sdk/ndk/20.0.5594570/build/cmake/android.toolchain.cmake",
+    "/home/tanglizi/Code/android/vtalk/app/CMakeLists.txt",
+    "/home/tanglizi/Code/android/vtalk/app/../../../../Android/Sdk/ndk/20.0.5594570/build/cmake/platforms.cmake"
+  ],
+  "cleanCommands": [
+    "/home/tanglizi/Android/Sdk/cmake/3.10.2.4988404/bin/cmake --build /home/tanglizi/Code/android/vtalk/app/.externalNativeBuild/cmake/debug/x86_64 --target clean"
+  ],
+  "libraries": {
+    "native-lib-Debug-x86_64": {
+      "artifactName": "native-lib",
+      "buildCommand": "/home/tanglizi/Android/Sdk/cmake/3.10.2.4988404/bin/cmake --build /home/tanglizi/Code/android/vtalk/app/.externalNativeBuild/cmake/debug/x86_64 --target native-lib",
+      "abi": "x86_64",
+      "output": "/home/tanglizi/Code/android/vtalk/app/build/intermediates/cmake/debug/obj/x86_64/libnative-lib.so"
+    }
+  }
+}

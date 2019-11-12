@@ -56,7 +56,7 @@ import android.view.animation.Interpolator;
             this(context, null);
         }
 
-        public Kawaii_LoadingView(Context context, @Nullable AttributeSet attrs) {
+        public Kawaii_LoadingView(Context context, @org.jetbrains.annotations.Nullable AttributeSet attrs) {
             this(context, attrs, 0);
         }
 
