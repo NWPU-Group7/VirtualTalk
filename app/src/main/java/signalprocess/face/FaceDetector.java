@@ -1,4 +1,4 @@
-package signalprocess.facecapture;
+package signalprocess.face;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -15,8 +15,7 @@ import com.tzutalin.dlib.VisionDetRet;
 import java.util.ArrayList;
 import java.util.List;
 
-import network.NetworkActivity;
-import vtalk.activity.CameraActivity;
+import vtalk.activity.TalkActivity;
 
 public class FaceDetector {
     private String TAG = "FaceDetector";
@@ -25,13 +24,13 @@ public class FaceDetector {
 
     private double[] emotion = new double[10];
     private Context mContext;
-    private CameraActivity mActivity;
+    private TalkActivity mActivity;
     private FaceDet mFaceDet;
     private Paint mLandmarkPaint;
 
     private final double r_m = 0.4, r_n = 0.5;
 
-    public FaceDetector(Context c, CameraActivity activity) {
+    public FaceDetector(Context c, TalkActivity activity) {
 
         this.mContext = c;
         this.mActivity = activity;

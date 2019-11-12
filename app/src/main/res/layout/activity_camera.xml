@@ -7,16 +7,16 @@
              android:layout_height="match_parent"
              android:background="#000"
              android:layout_gravity="center_vertical|center_horizontal"
-             tools:context=".CameraActivity">
+             tools:context=".TalkActivity">
 
 
-    <signalprocess.facecapture.Live2dGLSurfaceView
+    <signalprocess.face.Live2dGLSurfaceView
         android:id="@+id/live2dView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="visible" />
 
-    <signalprocess.facecapture.CameraPreview
+    <signalprocess.face.CameraPreview
         android:id="@+id/cam_preview"
         android:layout_width="191dp"
         android:layout_height="135dp"
