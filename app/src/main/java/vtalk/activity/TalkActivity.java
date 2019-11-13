@@ -46,7 +46,7 @@ public class TalkActivity extends AppCompatActivity implements WebRtcClient.RtcL
     private static final int VIDEO_CALL_SENT = 666;
 
     private int FILL_FRAME_FACTOR = 5;
-    private int REQUIRE_FRAME_PRE_SECOND = 20;
+    private int REQUIRE_FRAME_PRE_SECOND = 10;
 
     private int CAMERA_REQUEST_CODE = 20;
 
@@ -187,6 +187,9 @@ public class TalkActivity extends AppCompatActivity implements WebRtcClient.RtcL
                         else
                             FILL_FRAME_FACTOR /= 2;
                         */
+
+                        if (!emtionQueue.isEmpty())
+                            FILL_FRAME_FACTOR = 1;
 
                         for (int i = 1; i <= FILL_FRAME_FACTOR; i++)
                         {
