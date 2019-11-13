@@ -137,7 +137,7 @@ public class RtcActivity extends Activity implements WebRtcClient.RtcListener {
         PeerConnectionParameters params = new PeerConnectionParameters(
                 true, false, displaySize.x, displaySize.y, 30, 1, VIDEO_CODEC_VP9, true, 1, AUDIO_CODEC_OPUS, true);
 
-        client = new WebRtcClient(this, mSocketAddress, params, VideoRendererGui.getEGLContext(), messageListener);
+        client = new WebRtcClient(this, mSocketAddress, params, VideoRendererGui.getEGLContext(), messageListener, null);
     }
 
     @Override

@@ -1,0 +1,41 @@
+
+{
+	"buildFiles" : 
+	[
+		"C:/Users/bullypaulo/Desktop/Android_study/VirtualTalk/app/CMakeLists.txt"
+	],
+	"cleanCommands" : 
+	[
+		"F:\\A-usefulSofware\\android_studio_sdk\\cmake\\3.6.4111459\\bin\\cmake.exe --build C:\\Users\\bullypaulo\\Desktop\\Android_study\\VirtualTalk\\app\\.externalNativeBuild\\cmake\\release\\x86 --target clean"
+	],
+	"cppFileExtensions" : [ "cpp" ],
+	"libraries" : 
+	{
+		"native-lib-Release-x86" : 
+		{
+			"abi" : "x86",
+			"artifactName" : "native-lib",
+			"buildCommand" : "F:\\A-usefulSofware\\android_studio_sdk\\cmake\\3.6.4111459\\bin\\cmake.exe --build C:\\Users\\bullypaulo\\Desktop\\Android_study\\VirtualTalk\\app\\.externalNativeBuild\\cmake\\release\\x86 --target native-lib",
+			"buildType" : "release",
+			"files" : 
+			[
+				
+				{
+					"flags" : "  --target=i686-none-linux-android19 --gcc-toolchain=F:/A-usefulSofware/android_studio_sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64 --sysroot=F:/A-usefulSofware/android_studio_sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64/sysroot  -Dnative_lib_EXPORTS  -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -mstackrealign -fno-addrsig -Wa,--noexecstack -Wformat -Werror=format-security   -O2 -DNDEBUG  -fPIC    -c ",
+					"src" : "C:/Users/bullypaulo/Desktop/Android_study/VirtualTalk/app/src/main/cpp/native-lib.cpp",
+					"workingDirectory" : "C:/Users/bullypaulo/Desktop/Android_study/VirtualTalk/app/.externalNativeBuild/cmake/release/x86"
+				}
+			],
+			"output" : "C:/Users/bullypaulo/Desktop/Android_study/VirtualTalk/app/build/intermediates/cmake/release/obj/x86/libnative-lib.so",
+			"toolchain" : "54654153"
+		}
+	},
+	"toolchains" : 
+	{
+		"54654153" : 
+		{
+			"cCompilerExecutable" : "F:/A-usefulSofware/android_studio_sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64/bin/clang.exe",
+			"cppCompilerExecutable" : "F:/A-usefulSofware/android_studio_sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64/bin/clang++.exe"
+		}
+	}
+}

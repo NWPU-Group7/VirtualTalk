@@ -5,6 +5,8 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.util.Log;
 
+import com.smp.soundtouchandroid.SoundTouch;
+
 import java.io.DataOutputStream;
 import java.util.LinkedList;
 
@@ -24,6 +26,7 @@ public class AudioRecordThread extends Thread
     protected boolean     m_keep_running ;
     protected LinkedList<byte[]> m_in_q ;
 
+
     public void run()
     {
         try
@@ -36,7 +39,9 @@ public class AudioRecordThread extends Thread
                 bytes_pkg = m_in_bytes.clone() ;
                 if(m_in_q.size() >= 2)
                 {
-                    talkActivity.postAudio(m_in_q.removeFirst());
+                    byte[] processed = m_in_q.removeFirst();
+
+                    talkActivity.postAudio(processed);
                 }
                 m_in_q.add(bytes_pkg) ;
             }

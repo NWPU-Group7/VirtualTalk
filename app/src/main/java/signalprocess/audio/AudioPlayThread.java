@@ -5,6 +5,10 @@ import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.util.Log;
 
+import com.smp.soundtouchandroid.SoundTouch;
+
+import java.io.IOException;
+
 import vtalk.activity.TalkActivity;
 
 /**
@@ -19,6 +23,7 @@ public class AudioPlayThread extends Thread
     protected int        m_out_buf_size ;
     protected byte []    m_out_bytes ;
     protected boolean    m_keep_running ;
+
     public void init(TalkActivity talkActivity)
     {
         try
@@ -38,9 +43,6 @@ public class AudioPlayThread extends Thread
             m_out_bytes=new byte[m_out_buf_size];
 
             this.talkActivity = talkActivity;
-
-            // new Thread(R1).start();
-
         }
         catch(Exception e)
         {
@@ -60,17 +62,16 @@ public class AudioPlayThread extends Thread
 
     public void run()
     {
+        Log.d("playThread", "run");
         byte [] bytes_pkg = null ;
         m_out_trk.play() ;
         while(m_keep_running) {
-            try
-            {
+            try {
                 m_out_bytes = talkActivity.getAudio();
 
-                if (m_out_bytes != null)
-                {
+                if (m_out_bytes != null) {
                     bytes_pkg = m_out_bytes.clone() ;
-                    m_out_trk.write(bytes_pkg, 0, bytes_pkg.length) ;
+                    m_out_trk.write(bytes_pkg, 0, bytes_pkg.length);
                 }
             }
             catch(Exception e)

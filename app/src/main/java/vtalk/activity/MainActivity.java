@@ -54,28 +54,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Click({R.id.cam_button})
     protected void launchCamera() {
-
-        /*sholdShowLoadingView = true;
-
-        new Thread(new Runnable()
-        {
-            @Override
-            public void run() {
-                while (MainActivity.sholdShowLoadingView){
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-                Message msg = new Message();
-                msg.what = 1;
-                handler.sendMessage(msg);
-            }
-        }).start();*/
-
-        //Toast.makeText(this, "初始化将会占用几秒，请耐心等待", Toast.LENGTH_LONG);
-
         Intent intent = new Intent(this, TalkActivity.class);
         intent.putExtra("callerId", callerId);
         startActivity(intent);
