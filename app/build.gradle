@@ -29,6 +29,12 @@ android {
         }
         signingConfig signingConfigs.key0
     }
+
+    lintOptions{
+        checkReleaseBuilds false
+        abortOnError false
+    }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -76,4 +82,5 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile project(':kawaii_loadingview')
     compile project(':androidRTC')
+    compile project(':soundtouch_library')
 }

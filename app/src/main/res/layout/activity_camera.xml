@@ -24,9 +24,15 @@
 
     <TextView
         android:id="@+id/infoText"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:fontFamily="casual"
         android:text="当前还没有人加入聊天室"
-        android:textColor="@android:color/holo_red_dark" />
+        android:textAlignment="center"
+        android:textAllCaps="true"
+        android:textColor="?android:attr/textColorLinkInverse"
+        android:textSize="24sp"
+        android:textStyle="bold|italic"
+        android:typeface="sans" />
 
 </FrameLayout>

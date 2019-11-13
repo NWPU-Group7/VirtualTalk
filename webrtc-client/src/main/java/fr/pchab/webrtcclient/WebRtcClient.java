@@ -43,6 +43,7 @@ public class WebRtcClient {
     private Socket client;
 
     private MessageListener messageListener;
+    private AudioListener audioListener;
 
     /**
      * Implement this interface to be notified of events.
@@ -128,9 +129,16 @@ public class WebRtcClient {
     }
 
     public void sendMessageViaDataChannelToAllPeers(String message){
-        Log.d(TAG, "peerSize " + peers.size());
+        Log.d(TAG, "message peerSize " + peers.size());
         for (Peer peer: peers.values()){
             peer.sendMessageViaDataChannel(message);
+        }
+    }
+
+    public void sendAudioViaDataChannelToAllPeers(byte[] bytes){
+        Log.d(TAG, "audio peerSize " + peers.size());
+        for (Peer peer: peers.values()){
+            peer.sendAudioViaDataChannel(bytes);
         }
     }
 
@@ -188,12 +196,17 @@ public class WebRtcClient {
         void onMessage(String message);
     }
 
+    public interface AudioListener {
+        void onAudio(byte[] bytes);
+    }
+
     private class Peer implements SdpObserver, PeerConnection.Observer, DataChannel.Observer {
         private PeerConnection pc;
-        private DataChannel dataChannel;
+        private DataChannel dataChannel, dataChannelAudio;
         private String id;
         private int endPoint;
         private MessageListener listener;
+        private AudioListener audioListener;
 
         public Peer(String id, int endPoint) {
             Log.d(TAG, "new Peer: " + id + " " + endPoint);
@@ -207,6 +220,27 @@ public class WebRtcClient {
             dataChannel = pc.createDataChannel("dataChannel", init);
             dataChannel.registerObserver(this);
 
+            DataChannel.Init initAudio = new DataChannel.Init();
+            initAudio.ordered = true;
+            dataChannelAudio = pc.createDataChannel("dataChannelAudio", initAudio);
+            dataChannelAudio.registerObserver(new DataChannel.Observer(){
+                @Override
+                public void onStateChange() {
+                    Log.d(TAG, "DataChannel Audio onStateChange: " + dataChannelAudio.state());
+                }
+
+                @Override
+                public void onMessage(DataChannel.Buffer buffer) {
+                    ByteBuffer data = buffer.data;
+                    byte[] bytes = new byte[data.capacity()];
+                    data.get(bytes);
+
+                    Log.d(TAG, "### DataChannel onAudio");
+                    if (audioListener != null)
+                        audioListener.onAudio(bytes);
+                }
+            });
+
             //pc.addStream(localMS); //, new MediaConstraints()
             mListener.onStatusChanged("CONNECTING");
         }
@@ -216,11 +250,21 @@ public class WebRtcClient {
             this.listener = listener;
         }
 
+        public void setAudioListener(AudioListener audioListener){
+            this.audioListener = audioListener;
+        }
+
         public void sendMessageViaDataChannel(String message){
             Log.d(TAG, "### DataChannel sendMessage: " + message);
             byte[] messageBytes = message.getBytes();
             DataChannel.Buffer buffer = new DataChannel.Buffer(ByteBuffer.wrap(messageBytes), false);
             dataChannel.send(buffer);
+        }
+
+        public void sendAudioViaDataChannel(byte[] bytes){
+            Log.d(TAG, "### DataChannel sendAudio");
+            DataChannel.Buffer buffer = new DataChannel.Buffer(ByteBuffer.wrap(bytes), true);
+            dataChannelAudio.send(buffer);
         }
 
         @Override
@@ -235,9 +279,11 @@ public class WebRtcClient {
             data.get(bytes);
 
             String message = new String(bytes);
-            Log.d(TAG, "### DataChannel onMessage: " + message);
-            if (this.listener != null)
+            Log.d(TAG, "### DataChannel onMessage" );
+            if (!buffer.binary && this.listener != null)
                 listener.onMessage(message);
+            if (buffer.binary && audioListener != null)
+                audioListener.onAudio(bytes);
         }
 
         // =============== SdpObserver ===============
@@ -326,6 +372,7 @@ public class WebRtcClient {
     private Peer addPeer(String id, int endPoint) {
         Peer peer = new Peer(id, endPoint);
         peer.setListener(messageListener);
+        peer.setAudioListener(audioListener);
         peers.put(id, peer);
 
         endPoints[endPoint] = true;
@@ -340,8 +387,10 @@ public class WebRtcClient {
         endPoints[peer.endPoint] = false;
     }
 
-    public WebRtcClient(RtcListener listener, String host, PeerConnectionParameters params, EGLContext mEGLcontext, MessageListener MessageListener) {
+    public WebRtcClient(RtcListener listener, String host, PeerConnectionParameters params,
+                        EGLContext mEGLcontext, MessageListener messageListener, AudioListener audioListener) {
         this.messageListener = messageListener;
+        this.audioListener = audioListener;
         this.mListener = listener;
         this.pcParams = params;
         PeerConnectionFactory.initializeAndroidGlobals(listener, true, true,

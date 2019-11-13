@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        is-multidex="false"
+        jar="C:\Users\bullypaulo\Desktop\Android_study\VirtualTalk\kawaii_loadingview\build\intermediates\bundles\default\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="28.0.3"
+        sha1="a197a68cede166f400696251939f8bfe8a66f7bf">
+        <dex dex="C:\Users\bullypaulo\Desktop\Android_study\VirtualTalk\app\build\intermediates\pre-dexed\debug\classes_6b0cbdf563666ca562c9053a248028946d25fc82.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\bullypaulo\Desktop\Android_study\VirtualTalk\webrtc-client\build\intermediates\bundles\default\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="28.0.3"
+        sha1="ab17b159e3258a8066c0d13adba7411b16f34cb0">
+        <dex dex="C:\Users\bullypaulo\Desktop\Android_study\VirtualTalk\app\build\intermediates\pre-dexed\debug\classes_1a3848088bda0434b3f8cc29c7fbe6f978994760.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\bullypaulo\Desktop\Android_study\VirtualTalk\soundtouch_library\build\intermediates\bundles\default\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="28.0.3"
+        sha1="b3b721fb1d572baf7c8df335880bb7557abf6383">
+        <dex dex="C:\Users\bullypaulo\Desktop\Android_study\VirtualTalk\app\build\intermediates\pre-dexed\debug\classes_3906f61a4d547552728eb4d444de07ec285e6a3c.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\bullypaulo\Desktop\Android_study\VirtualTalk\androidRTC\build\intermediates\bundles\default\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="28.0.3"
+        sha1="839680b8df145e8fe9d9a0f0727134f163b1f576">
+        <dex dex="C:\Users\bullypaulo\Desktop\Android_study\VirtualTalk\app\build\intermediates\pre-dexed\debug\classes_608fa292e612e16ef8f5577b970689de02f5dfcf.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\bullypaulo\Desktop\Android_study\VirtualTalk\app\libs\live2d_android.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="28.0.3"
+        sha1="c67cd3438063044d8fc8505bf11a0bd8182667f6">
+        <dex dex="C:\Users\bullypaulo\Desktop\Android_study\VirtualTalk\app\build\intermediates\pre-dexed\debug\live2d_android_73e55c68d99eaa0854c5a4b9cb01cfae5f09fd18.jar" />
+    </item>
+
+</items>

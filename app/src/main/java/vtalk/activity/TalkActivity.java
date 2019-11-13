@@ -6,14 +6,19 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 
 
 import org.json.JSONException;
+import org.w3c.dom.Text;
 import org.webrtc.MediaStream;
 import org.webrtc.VideoRendererGui;
 
@@ -23,11 +28,15 @@ import java.util.StringTokenizer;
 
 import fr.pchab.webrtcclient.PeerConnectionParameters;
 import fr.pchab.webrtcclient.WebRtcClient;
+import signalprocess.audio.AudioPlayThread;
 import signalprocess.audio.AudioRecordThread;
 import signalprocess.face.CameraPreview;
 import signalprocess.face.Live2dGLSurfaceView;
 import network.Live2DReference;
 import network.NetworkActivity;
+
+import static java.lang.Math.max;
+
 
 public class TalkActivity extends AppCompatActivity implements WebRtcClient.RtcListener, NetworkActivity {
 
@@ -36,7 +45,8 @@ public class TalkActivity extends AppCompatActivity implements WebRtcClient.RtcL
     private static final String AUDIO_CODEC_OPUS = "opus";
     private static final int VIDEO_CALL_SENT = 666;
 
-    private final int FILL_FRAME_FACTOR = 10;
+    private int FILL_FRAME_FACTOR = 5;
+    private int REQUIRE_FRAME_PRE_SECOND = 20;
 
     private int CAMERA_REQUEST_CODE = 20;
 
@@ -47,6 +57,16 @@ public class TalkActivity extends AppCompatActivity implements WebRtcClient.RtcL
     public String mSocketAddress;
     public WebRtcClient client;
     private WebRtcClient.MessageListener messageListener;
+    private WebRtcClient.AudioListener audioListener;
+    public boolean isConnected;
+    public Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            if (msg.what == 1)
+                connectInfoView.setVisibility(View.INVISIBLE);
+        }
+    };
 
     public Queue<double[]> emtionQueue;
     public Queue<byte[]> audioQueue;
@@ -54,6 +74,7 @@ public class TalkActivity extends AppCompatActivity implements WebRtcClient.RtcL
     /** 显示部分 **/
     private CameraPreview mCameraPreview; //相机view
     public Live2dGLSurfaceView mGLSurfaceView; //虚拟人物view
+    private TextView connectInfoView;
 
     public final double[] emotion = new double[10]; // 人物表情控制参数
     private int emotionSize = 4; // 总共的表情数 用于通讯控制
@@ -61,6 +82,8 @@ public class TalkActivity extends AppCompatActivity implements WebRtcClient.RtcL
 
     /** 语音部分 **/
     public AudioRecordThread audioRecordThread;
+    public AudioPlayThread audioPlayThread;
+    protected long prevReceiveTime = System.currentTimeMillis();
 
     protected void changeVisiable() {
         mGLSurfaceView.setVisibility(View.GONE);
@@ -88,6 +111,8 @@ public class TalkActivity extends AppCompatActivity implements WebRtcClient.RtcL
         emtionQueue = new LinkedList<>();
         audioQueue = new LinkedList<>();
 
+        isConnected = false;
+
         callerId = null;
         Intent intent = getIntent();
         callerId = intent.getStringExtra("callerId");
@@ -98,7 +123,26 @@ public class TalkActivity extends AppCompatActivity implements WebRtcClient.RtcL
         mGLSurfaceView = (Live2dGLSurfaceView) findViewById(R.id.live2dView);
         mGLSurfaceView.init(TalkActivity.this, Live2DReference.MODEL_SET.get(0), Live2DReference.TEXTURE_SET.get(0), 1, 1);
 
+        connectInfoView = (TextView) findViewById(R.id.infoText);
+        new Thread(new Runnable()
+        {
+            @Override
+            public void run() {
+                while (!isConnected){
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                Message msg = new Message();
+                msg.what = 1;
+                handler.sendMessage(msg);
+            }
+        }).start();
+
         networkSetup();
+        audioUnitSetup();
 
         MainActivity.sholdShowLoadingView = false;
     }
@@ -122,6 +166,7 @@ public class TalkActivity extends AppCompatActivity implements WebRtcClient.RtcL
             @Override
             public void onMessage(String message) {
 
+                isConnected = true;
                 StringTokenizer tokenizer = new StringTokenizer(message, " ");
                 if (tokenizer.countTokens() != emotionSize)
                     Log.d(TAG, "received message error");
@@ -132,6 +177,16 @@ public class TalkActivity extends AppCompatActivity implements WebRtcClient.RtcL
                         tmp[i] = Double.valueOf(tokenizer.nextToken());
 
                     synchronized(emtionQueue) {
+
+                        int rtt = (int)(System.currentTimeMillis() - prevReceiveTime)/1000;
+                        prevReceiveTime = System.currentTimeMillis();
+                        FILL_FRAME_FACTOR = (int)((rtt * REQUIRE_FRAME_PRE_SECOND)/8.0 + FILL_FRAME_FACTOR / 8.0 * 7 + 1);
+                        /*
+                        if (emtionQueue.isEmpty())
+                            FILL_FRAME_FACTOR = max(10, FILL_FRAME_FACTOR+1);
+                        else
+                            FILL_FRAME_FACTOR /= 2;
+                        */
 
                         for (int i = 1; i <= FILL_FRAME_FACTOR; i++)
                         {
@@ -147,7 +202,17 @@ public class TalkActivity extends AppCompatActivity implements WebRtcClient.RtcL
             }
         };
 
-        client = new WebRtcClient(this, mSocketAddress, params, VideoRendererGui.getEGLContext(), messageListener);
+        audioListener = new WebRtcClient.AudioListener() {
+            @Override
+            public void onAudio(byte[] bytes) {
+                synchronized (audioQueue){
+                    audioQueue.add(bytes);
+                }
+            }
+        };
+
+        client = new WebRtcClient(this, mSocketAddress, params, VideoRendererGui.getEGLContext(),
+                messageListener, audioListener);
 
         //client.start("virtual_talk");
 
@@ -158,8 +223,11 @@ public class TalkActivity extends AppCompatActivity implements WebRtcClient.RtcL
     {
         audioRecordThread = new AudioRecordThread();
         audioRecordThread.init(this);
+        audioRecordThread.start();
 
-        //audioRecordThread.start();
+        audioPlayThread = new AudioPlayThread();
+        audioPlayThread.init(this);
+        audioPlayThread.start();
     }
 
     public double[] getEmotion(){
@@ -184,7 +252,7 @@ public class TalkActivity extends AppCompatActivity implements WebRtcClient.RtcL
     }
 
     public void postAudio(byte[] audioByte){
-
+        client.sendAudioViaDataChannelToAllPeers(audioByte);
     }
 
     public byte[] getAudio() {
@@ -236,6 +304,7 @@ public class TalkActivity extends AppCompatActivity implements WebRtcClient.RtcL
         super.onDestroy();
         callerId = null;
         audioRecordThread.free();
+        audioPlayThread.free();
     }
 
     @Override
